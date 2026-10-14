@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TruthGuard — Explainable Real-Time Misinformation Assistant</title>
+  <meta name="description" content="AI-driven, explainable misinformation triage and fact-checking assistant powered by FastEmbed ONNX multilingual embeddings, Scikit-Learn, and FastAPI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --bg-surface: #0d121d;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 53, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(99, 102, 241, 0.35);
+
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+
+      --brand: #6366f1;
+      --brand-glow: rgba(99, 102, 241, 0.35);
+
+      --color-reliable: #10b981;
+      --color-reliable-glow: rgba(16, 185, 129, 0.25);
+      --color-reliable-bg: rgba(16, 185, 129, 0.12);
+
+      --color-warning: #f59e0b;
+      --color-warning-glow: rgba(245, 158, 11, 0.25);
+      --color-warning-bg: rgba(245, 158, 11, 0.12);
+
+      --color-fake: #ef4444;
+      --color-fake-glow: rgba(239, 68, 68, 0.25);
+      --color-fake-bg: rgba(239, 68, 68, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(239, 68, 68, 0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0 32px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--brand-glow);
+    }
+
+    .brand-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2.2;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(99, 102, 241, 0.18);
+      color: #a5b4fc;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-reliable);
+      background: var(--color-reliable-bg);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-reliable);
+      box-shadow: 0 0 10px var(--color-reliable);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Hero / Stat Bar */
+    .hero-banner {
+      margin: 32px 0 36px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .hero-text-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-text-card h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-text-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-2px);
+    }
+
+    .stat-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+    }
+
+    /* Tab Navigation */
+    .tab-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+    }
+
+    /* Section Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .hero-banner { grid-template-columns: 1fr; }
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Presets Chips */
+    .preset-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #e0e7ff;
+      transform: translateY(-1px);
+    }
+
+    /* Input Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      padding: 12px 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-glow);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .input-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Primary CTA */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 18px var(--brand-glow);
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Result Panel */
+    .empty-result-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-result-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      stroke: var(--text-dim);
+    }
+
+    /* Triage Hero in Result */
+    .triage-display {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .triage-display.label-reliable {
+      background: var(--color-reliable-bg);
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 25px var(--color-reliable-glow);
+    }
+
+    .triage-display.label-warning {
+      background: var(--color-warning-bg);
+      border-color: rgba(245, 158, 11, 0.35);
+      box-shadow: 0 0 25px var(--color-warning-glow);
+    }
+
+    .triage-display.label-fake {
+      background: var(--color-fake-bg);
+      border-color: rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 25px var(--color-fake-glow);
+    }
+
+    .triage-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .triage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .badge-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .label-reliable .triage-badge {
+      background: #064e3b;
+      color: #34d399;
+      border: 1px solid #10b981;
+    }
+    .label-reliable .badge-dot { background: #34d399; box-shadow: 0 0 8px #34d399; }
+
+    .label-warning .triage-badge {
+      background: #78350f;
+      color: #fbbf24;
+      border: 1px solid #f59e0b;
+    }
+    .label-warning .badge-dot { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+
+    .label-fake .triage-badge {
+      background: #7f1d1d;
+      color: #f87171;
+      border: 1px solid #ef4444;
+    }
+    .label-fake .badge-dot { background: #f87171; box-shadow: 0 0 8px #f87171; }
+
+    /* Risk Score Gauge Area */
+    .risk-score-display {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .risk-meter-bar-container {
+      flex: 1;
+    }
+
+    .risk-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .risk-bar-track {
+      height: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .risk-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .label-reliable .risk-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+    .label-warning .risk-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .label-fake .risk-bar-fill { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .risk-number-box {
+      text-align: right;
+      min-width: 70px;
+    }
+
+    .risk-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .risk-number-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-dim);
+    }
+
+    /* Submetrics Grid */
+    .submetrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .submetric-box {
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+
+    .submetric-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .submetric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    /* Reasons List */
+    .reasons-container {
+      margin-bottom: 20px;
+    }
+
+    .reasons-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .reasons-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reason-item {
+      font-size: 13px;
+      color: var(--text-main);
+      background: rgba(10, 14, 23, 0.5);
+      border-left: 3px solid var(--brand);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .reason-item.flag-warning {
+      border-left-color: var(--color-warning);
+    }
+
+    .reason-item.flag-fake {
+      border-left-color: var(--color-fake);
+    }
+
+    .reason-item.flag-reliable {
+      border-left-color: var(--color-reliable);
+    }
+
+    /* Matched Fact Card */
+    .matched-fact-box {
+      background: rgba(10, 14, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .matched-fact-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #a5b4fc;
+      margin-bottom: 6px;
+    }
+
+    .matched-claim-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+
+    .matched-fact-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .matched-fact-meta a {
+      color: #818cf8;
+      text-decoration: none;
+    }
+
+    .matched-fact-meta a:hover {
+      text-decoration: underline;
+    }
+
+    /* Feedback widget */
+    .feedback-section {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .feedback-text {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .feedback-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .feedback-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .feedback-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    /* Social Feed View (Tab 2) */
+    .feed-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feed-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .feed-item-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .feed-author-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .feed-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #374151, #1f2937);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      color: #9ca3af;
+    }
+
+    .feed-meta {
+      flex: 1;
+    }
+
+    .feed-author-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feed-handle {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .feed-content {
+      font-size: 14px;
+      color: var(--text-main);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .feed-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-verify-feed {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-verify-feed:hover {
+      background: rgba(99, 102, 241, 0.3);
+      color: #ffffff;
+    }
+
+    .feed-inline-result {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    /* History View (Tab 3) */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 12px 14px;
+      color: var(--text-dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .history-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .history-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-pill.pill-reliable { background: var(--color-reliable-bg); color: var(--color-reliable); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-pill.pill-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-pill.pill-fake { background: var(--color-fake-bg); color: var(--color-fake); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Footer */
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="brand-title">TruthGuard</span>
+            <span class="brand-tag">Explainable AI</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-dim);">Real-Time Multilingual Misinformation Triage</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-badge" id="engineStatusBadge">
+          <span class="status-pulse"></span>
+          <span>FastEmbed ONNX Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero / Summary Banner -->
+    <div class="hero-banner">
+      <div class="hero-text-card">
+        <h1>Explainable Real-Time Misinformation Assistant</h1>
+        <p>Built with strict evidence-first classification, quantized multilingual ONNX embeddings (English, தமிழ், हिन्दी), stylometric heuristics, and scikit-learn ML inference.</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statTotalCount">0</div>
+        <div class="stat-label">Analyses Processed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: var(--color-fake);" id="statFakesCount">0</div>
+        <div class="stat-label">Debunked Claims</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: var(--color-reliable);" id="statReliableCount">0</div>
+        <div class="stat-label">Verified Reliable</div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabBtnInspector" onclick="switchTab('inspector')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Interactive Claim Inspector
+      </button>
+      <button class="tab-btn" id="tabBtnFeed" onclick="switchTab('feed')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+        Simulated Social Media Feed
+      </button>
+      <button class="tab-btn" id="tabBtnHistory" onclick="switchTab('history')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Verification Audit Log
+      </button>
+    </div>
+
+    <!-- TAB 1: INTERACTIVE CLAIM INSPECTOR -->
+    <div id="tabInspectorView">
+      <div class="main-grid">
+        <!-- Input Column -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Analyze Content
+            </h2>
+            <span style="font-size: 12px; color: var(--text-dim);">Strict Evidence-First</span>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="preset-label">
+            <span>Quick Test Presets (English • தமிழ் • हिन्दी)</span>
+            <span style="cursor:pointer; color:#818cf8;" onclick="clearInputs()">Clear</span>
+          </div>
+          <div class="preset-chips">
+            <div class="chip" onclick="loadPreset('en-fake')">🇬🇧 RBI 1000 GPS Chip</div>
+            <div class="chip" onclick="loadPreset('en-true')">🇬🇧 ISRO Chandrayaan-3</div>
+            <div class="chip" onclick="loadPreset('ta-fake')">🇮🇳 புதிய 2000 நோட்டு ஜிபிஎஸ்</div>
+            <div class="chip" onclick="loadPreset('ta-true')">🇮🇳 நிலவில் சந்திரயான் 3</div>
+            <div class="chip" onclick="loadPreset('hi-fake')">🇮🇳 2000 नोट में नैनो चिप</div>
+            <div class="chip" onclick="loadPreset('hi-true')">🇮🇳 चंद्रयान 3 सफल लैंडिंग</div>
+            <div class="chip" onclick="loadPreset('polarity')">⚖️ Polarity Safeguard</div>
+            <div class="chip" onclick="loadPreset('ling-extreme')">🚨 Sensational Clickbait</div>
+          </div>
+
+          <form id="analyzeForm" onsubmit="handleAnalyzeSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="inputText">Claim / Post / Article Text</label>
+              <textarea id="inputText" placeholder="Paste text, viral WhatsApp forward, tweet, or article content here in English, Tamil, or Hindi..." required></textarea>
+              <div class="input-meta">
+                <span id="charCount">0 characters</span>
+                <span>Supports Multilingual ONNX FastEmbed</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="inputUrl">Reference Domain / URL (Optional)</label>
+              <input type="text" id="inputUrl" placeholder="e.g. https://www.thehindu.com or https://suspicious-news.xyz/..." />
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnAnalyze">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Verify with TruthGuard</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Result Column -->
+        <div class="card" id="resultCard">
+          <div class="card-header">
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Triage & Explainability Report
+            </h2>
+          </div>
+
+          <!-- Empty state -->
+          <div id="resultEmptyState" class="empty-result-state">
+            <svg class="empty-result-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Awaiting Input</p>
+            <p style="font-size: 13px;">Enter a claim or select a multilingual preset to inspect.</p>
+          </div>
+
+          <!-- Result Content -->
+          <div id="resultContent" style="display: none;">
+            <!-- Triage Hero -->
+            <div id="triageHero" class="triage-display">
+              <div class="triage-badge-row">
+                <div class="triage-badge" id="triageBadge">
+                  <span class="badge-dot"></span>
+                  <span id="triageLabelText">Needs Verification</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  Confidence: <strong id="triageConfidenceVal" style="color: #fff;">0.92</strong>
+                </div>
+              </div>
+
+              <!-- Risk Gauge Bar -->
+              <div class="risk-score-display">
+                <div class="risk-meter-bar-container">
+                  <div class="risk-bar-labels">
+                    <span>Low Risk (0)</span>
+                    <span>Risk Index: <span id="riskMeterNum">50</span>/100</span>
+                    <span>Critical (100)</span>
+                  </div>
+                  <div class="risk-bar-track">
+                    <div class="risk-bar-fill" id="riskBarFill" style="width: 50%;"></div>
+                  </div>
+                </div>
+                <div class="risk-number-box">
+                  <div class="risk-number" id="riskScoreVal">50</div>
+                  <div class="risk-number-label">Risk Score</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Matched Fact Check Details (if matched) -->
+            <div id="matchedFactBox" class="matched-fact-box" style="display: none;">
+              <div class="matched-fact-header">
+                <span>Verified Fact-Check Database Match</span>
+                <span id="matchedSimBadge" style="background: rgba(99, 102, 241, 0.2); padding: 2px 6px; border-radius: 4px;">Sim: 94.2%</span>
+              </div>
+              <div class="matched-claim-text" id="matchedClaimText">"..."</div>
+              <div class="matched-fact-meta">
+                <span>Publisher: <strong id="matchedPublisher" style="color:#fff;">BoomLive</strong></span>
+                <span>Verdict: <strong id="matchedVerdict" style="color:#fff;">False</strong></span>
+                <span id="matchedUrlContainer"><a id="matchedUrlLink" href="#" target="_blank" rel="noopener">Read Source ↗</a></span>
+              </div>
+            </div>
+
+            <!-- Explainability Reasons -->
+            <div class="reasons-container">
+              <div class="reasons-title">Explainability & Decision Signals</div>
+              <ul class="reasons-list" id="reasonsList"></ul>
+            </div>
+
+            <!-- Multi-Modal Submetrics -->
+            <div class="submetrics-grid">
+              <div class="submetric-box">
+                <div class="submetric-title">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  Linguistic Risk
+                </div>
+                <div class="submetric-val" id="submetricLing">0 / 100</div>
+              </div>
+              <div class="submetric-box">
+                <div class="submetric-title">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                  Domain Safety
+                </div>
+                <div class="submetric-val" id="submetricDomain">Neutral (50/100)</div>
+              </div>
+              <div class="submetric-box">
+                <div class="submetric-title">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  ML Misinfo Prob
+                </div>
+                <div class="submetric-val" id="submetricML">0.0%</div>
+              </div>
+              <div class="submetric-box">
+                <div class="submetric-title">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                  Semantic Match
+                </div>
+                <div class="submetric-val" id="submetricMatch">None</div>
+              </div>
+            </div>
+
+            <!-- Feedback Row -->
+            <div class="feedback-section">
+              <span class="feedback-text">Agree with this triage classification?</span>
+              <div class="feedback-btns">
+                <button class="feedback-btn" onclick="sendFeedback('agree')">👍 Agree</button>
+                <button class="feedback-btn" onclick="sendFeedback('disagree')">👎 Dispute</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SIMULATED SOCIAL MEDIA FEED -->
+    <div id="tabFeedView" style="display: none;">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-family: 'Outfit'; font-size: 20px; font-weight: 700; margin-bottom: 4px;">Live Social Media & News Feed Simulation</h2>
+        <p style="font-size: 13px; color: var(--text-muted);">Simulated dynamic stream of incoming posts across English, Tamil, and Hindi. Click <strong>Verify with TruthGuard</strong> on any item to run instant explainable verification.</p>
+      </div>
+
+      <div class="feed-container" id="feedContainer">
+        <!-- Feed Item 1 (EN Fake) -->
+        <div class="feed-item-card" id="feedItem-1">
+          <div class="feed-author-row">
+            <div class="feed-avatar" style="background:#7f1d1d; color:#fca5a5;">RW</div>
+            <div class="feed-meta">
+              <div class="feed-author-name">Rapid Wire News <span style="font-size:11px; color:#f87171; background:rgba(239,68,68,0.2); padding:1px 6px; border-radius:4px;">Unverified Account</span></div>
+              <div class="feed-handle">@rapidwire_viral • 12m ago</div>
+            </div>
+          </div>
+          <div class="feed-content">
+            SHOCKING! Reserve Bank of India is issuing brand new 1000 rupee notes with satellite tracking GPS chips! Forward to all your family and friends before it is deleted!
+          </div>
+          <div class="feed-action-bar">
+            <span style="font-size:12px; color:var(--text-dim);">Source: WhatsApp Broadcast / Social</span>
+            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-1', 'RBI is issuing new 1000 rupee notes with embedded GPS tracking microchip', 'https://viral-news-flash.xyz/rbi')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verify with TruthGuard
+            </button>
+          </div>
+          <div class="feed-inline-result" id="feedItem-1-result"></div>
+        </div>
+
+        <!-- Feed Item 2 (TA Fake) -->
+        <div class="feed-item-card" id="feedItem-2">
+          <div class="feed-author-row">
+            <div class="feed-avatar" style="background:#831843; color:#fbcfe8;">தச</div>
+            <div class="feed-meta">
+              <div class="feed-author-name">தமிழ் செய்திகள் 24x7</div>
+              <div class="feed-handle">@tamil_viral_feed • 35m ago</div>
+            </div>
+          </div>
+          <div class="feed-content">
+            அதிர்ச்சி செய்தி! புதிய 2000 ரூபாய் நோட்டில் செயற்கைக்கோள் ஜிபிஎஸ் மைக்ரோசிப் பொருத்தப்பட்டுள்ளது! உடனே அனைவருக்கும் பகிருங்கள்!
+          </div>
+          <div class="feed-action-bar">
+            <span style="font-size:12px; color:var(--text-dim);">Source: வாட்ஸ்அப் ஃபார்வர்ட் செய்தி</span>
+            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-2', 'புதிய 2000 ரூபாய் நோட்டில் செயற்கைக்கோள் ஜிபிஎஸ் மைக்ரோசிப் பொருத்தப்பட்டுள்ளது', '')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verify with TruthGuard
+            </button>
+          </div>
+          <div class="feed-inline-result" id="feedItem-2-result"></div>
+        </div>
+
+        <!-- Feed Item 3 (HI True) -->
+        <div class="feed-item-card" id="feedItem-3">
+          <div class="feed-author-row">
+            <div class="feed-avatar" style="background:#064e3b; color:#6ee7b7;">विब</div>
+            <div class="feed-meta">
+              <div class="feed-author-name">विज्ञान भारत <span style="font-size:11px; color:#34d399; background:rgba(16,185,129,0.2); padding:1px 6px; border-radius:4px;">Verified Press</span></div>
+              <div class="feed-handle">@vigyan_bharat • 1h ago</div>
+            </div>
+          </div>
+          <div class="feed-content">
+            भारत ने चंद्रमा के दक्षिणी ध्रुव पर चंद्रयान 3 की सफल लैंडिंग कराकर विश्व स्तर पर नया कीर्तिमान स्थापित किया है। इसरो वैज्ञानिकों को बधाई।
+          </div>
+          <div class="feed-action-bar">
+            <span style="font-size:12px; color:var(--text-dim);">Source: pib.gov.in</span>
+            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-3', 'भारत ने चंद्रमा के दक्षिणी ध्रुव पर चंद्रयान 3 की सफल लैंडिंग कराई', 'https://pib.gov.in/chandrayaan-3')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verify with TruthGuard
+            </button>
+          </div>
+          <div class="feed-inline-result" id="feedItem-3-result"></div>
+        </div>
+
+        <!-- Feed Item 4 (EN Reliable) -->
+        <div class="feed-item-card" id="feedItem-4">
+          <div class="feed-author-row">
+            <div class="feed-avatar" style="background:#1e3a8a; color:#93c5fd;">RT</div>
+            <div class="feed-meta">
+              <div class="feed-author-name">Global Tech Dispatch <span style="font-size:11px; color:#60a5fa; background:rgba(37,99,235,0.2); padding:1px 6px; border-radius:4px;">Verified Agency</span></div>
+              <div class="feed-handle">@reuters_tech • 2h ago</div>
+            </div>
+          </div>
+          <div class="feed-content">
+            ISRO successfully landed Chandrayaan-3 near the lunar south pole, confirming telemetry data from the Vikram lander and Pragyan rover.
+          </div>
+          <div class="feed-action-bar">
+            <span style="font-size:12px; color:var(--text-dim);">Source: reuters.com</span>
+            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-4', 'ISRO successfully landed Chandrayaan-3 near the lunar south pole', 'https://www.reuters.com/space/chandrayaan')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verify with TruthGuard
+            </button>
+          </div>
+          <div class="feed-inline-result" id="feedItem-4-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: AUDIT HISTORY -->
+    <div id="tabHistoryView" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            SQLite Audit History
+          </h2>
+          <button class="feedback-btn" onclick="loadHistory()">Refresh Log</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Triage Label</th>
+                <th>Risk Score</th>
+                <th>Confidence</th>
+                <th>Claim / Input Excerpt</th>
+                <th>Domain / URL</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 24px;">Loading database records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>TruthGuard Misinformation Assistant &bull; Lightweight CPU-First Stack (FastEmbed ONNX &bull; Scikit-Learn &bull; FastAPI &bull; SQLite)</p>
+      <p style="margin-top: 4px; font-size: 11px;">Multilingual Support: English &bull; தமிழ் (Tamil) &bull; हिन्दी (Hindi) &bull; Manifest V3 Chrome Extension Ready</p>
+    </footer>
+  </div>
+
+  <script>
+    let currentAnalysisId = null;
+
+    // Presets
+    const PRESETS = {
+      "en-fake": {
+        text: "SHOCKING! RBI is issuing new 1000 rupee notes with embedded GPS tracking microchip! Forward to all before deleted!",
+        url: "https://viral-news.xyz/rbi-1000-gps"
+      },
+      "en-true": {
+        text: "ISRO successfully landed Chandrayaan-3 near the lunar south pole, confirming telemetry data from the Vikram lander.",
+        url: "https://www.reuters.com/space/isro-chandrayaan-3-moon-landing"
+      },
+      "ta-fake": {
+        text: "அதிர்ச்சி செய்தி! புதிய 2000 ரூபாய் நோட்டில் செயற்கைக்கோள் ஜிபிஎஸ் மைக்ரோசிப் பொருத்தப்பட்டுள்ளது! உடனே பகிருங்கள்!",
+        url: ""
+      },
+      "ta-true": {
+        text: "சந்திரயான் 3 விண்கலத்தை நிலவின் தென் துருவத்தில் இஸ்ரோ வெற்றிகரமாக தரையிறக்கியது.",
+        url: "https://pib.gov.in/tamil-chandrayaan"
+      },
+      "hi-fake": {
+        text: "धमाका! 2000 के नोट में नैनो जीपीएस चिप लगी है जो जमीन के 120 मीटर नीचे से सिग्नल भेज सकती है! तुरंत शेयर करें!",
+        url: ""
+      },
+      "hi-true": {
+        text: "भारत ने चंद्रमा के दक्षिणी ध्रुव पर चंद्रयान 3 की सफल लैंडिंग कराई और इतिहास रचा।",
+        url: "https://pib.gov.in/hindi/chandrayaan-3"
+      },
+      "polarity": {
+        text: "It is completely false and a debunked rumor that RBI is issuing new 1000 rupee notes with GPS microchips.",
+        url: ""
+      },
+      "ling-extreme": {
+        text: "URGENT WARNING! YOU WON'T BELIEVE THIS MIRACLE CURE! DOCTORS ARE TERRIFIED! FORWARD TO EVERYONE IMMEDIATELY! 🚨🚨🚨",
+        url: "https://daily-miracle-cures.top"
+      }
+    };
+
+    function loadPreset(key) {
+      const preset = PRESETS[key];
+      if (preset) {
+        document.getElementById('inputText').value = preset.text;
+        document.getElementById('inputUrl').value = preset.url || '';
+        updateCharCount();
+      }
+    }
+
+    function clearInputs() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('inputUrl').value = '';
+      updateCharCount();
+    }
+
+    // Character counter
+    const inputTextArea = document.getElementById('inputText');
+    inputTextArea.addEventListener('input', updateCharCount);
+    function updateCharCount() {
+      const len = inputTextArea.value.length;
+      document.getElementById('charCount').textContent = `${len} character${len === 1 ? '' : 's'}`;
+    }
+
+    // Tab Switcher
+    function switchTab(tab) {
+      document.getElementById('tabInspectorView').style.display = tab === 'inspector' ? 'block' : 'none';
+      document.getElementById('tabFeedView').style.display = tab === 'feed' ? 'block' : 'none';
+      document.getElementById('tabHistoryView').style.display = tab === 'history' ? 'block' : 'none';
+
+      document.getElementById('tabBtnInspector').classList.toggle('active', tab === 'inspector');
+      document.getElementById('tabBtnFeed').classList.toggle('active', tab === 'feed');
+      document.getElementById('tabBtnHistory').classList.toggle('active', tab === 'history');
+
+      if (tab === 'history') {
+        loadHistory();
+      }
+    }
+
+    // Form Submit Handler
+    async function handleAnalyzeSubmit(e) {
+      e.preventDefault();
+      const text = document.getElementById('inputText').value.trim();
+      const url = document.getElementById('inputUrl').value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById('btnAnalyze');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="status-pulse"></span> Verifying...`;
+
+      try {
+        const resp = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, url: url || null })
+        });
+        const data = await resp.json();
+        renderResult(data);
+        fetchStats();
+      } catch (err) {
+        alert('Error connecting to TruthGuard backend: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span>Verify with TruthGuard</span>`;
+      }
+    }
+
+    // Render Analysis Result
+    function renderResult(data) {
+      currentAnalysisId = data.id;
+      document.getElementById('resultEmptyState').style.display = 'none';
+      document.getElementById('resultContent').style.display = 'block';
+
+      const hero = document.getElementById('triageHero');
+      hero.className = 'triage-display';
+      if (data.label === 'Likely Reliable') {
+        hero.classList.add('label-reliable');
+      } else if (data.label === 'Potential Fake/Misinformation') {
+        hero.classList.add('label-fake');
+      } else {
+        hero.classList.add('label-warning');
+      }
+
+      document.getElementById('triageLabelText').textContent = data.label;
+      document.getElementById('triageConfidenceVal').textContent = (data.confidence * 100).toFixed(0) + '%';
+      document.getElementById('riskScoreVal').textContent = data.risk_score;
+      document.getElementById('riskMeterNum').textContent = data.risk_score;
+      document.getElementById('riskBarFill').style.width = `${Math.min(100, Math.max(5, data.risk_score))}%`;
+
+      // Fact-check box
+      const factBox = document.getElementById('matchedFactBox');
+      if (data.matched_claim) {
+        factBox.style.display = 'block';
+        document.getElementById('matchedClaimText').textContent = `"${data.matched_claim.claim}"`;
+        document.getElementById('matchedPublisher').textContent = data.matched_claim.publisher || 'Fact-Checker';
+        document.getElementById('matchedVerdict').textContent = (data.matched_claim.verdict || 'Reviewed').toUpperCase();
+        const simVal = (data.breakdown.fact_check.similarity * 100).toFixed(1);
+        document.getElementById('matchedSimBadge').textContent = `Sim: ${simVal}%`;
+        const link = document.getElementById('matchedUrlLink');
+        if (data.matched_claim.url) {
+          link.href = data.matched_claim.url;
+          link.style.display = 'inline';
+        } else {
+          link.style.display = 'none';
+        }
+      } else {
+        factBox.style.display = 'none';
+      }
+
+      // Reasons list
+      const reasonsList = document.getElementById('reasonsList');
+      reasonsList.innerHTML = '';
+      (data.reasons || []).forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'reason-item';
+        if (data.label === 'Likely Reliable') li.classList.add('flag-reliable');
+        else if (data.label === 'Potential Fake/Misinformation') li.classList.add('flag-fake');
+        else li.classList.add('flag-warning');
+        li.textContent = r;
+        reasonsList.appendChild(li);
+      });
+
+      // Multi-modal metrics
+      document.getElementById('submetricLing').textContent = `${data.breakdown.linguistic.risk_score} / 100`;
+      const domainTier = data.breakdown.domain.tier;
+      document.getElementById('submetricDomain').textContent = `${domainTier.toUpperCase()} (${data.breakdown.domain.risk_score}/100)`;
+      document.getElementById('submetricML').textContent = `${(data.breakdown.ml_classifier.fake_prob * 100).toFixed(1)}%`;
+      const matchText = data.breakdown.fact_check.matched 
+        ? `${(data.breakdown.fact_check.similarity * 100).toFixed(1)}% (${data.breakdown.fact_check.verdict})` 
+        : 'No Direct Match';
+      document.getElementById('submetricMatch').textContent = matchText;
+    }
+
+    // Inline feed verify
+    async function verifyFeedItem(itemId, text, url) {
+      const resContainer = document.getElementById(`${itemId}-result`);
+      resContainer.style.display = 'block';
+      resContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">Verifying claim with multilingual ONNX matcher...</div>`;
+
+      try {
+        const resp = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, url: url || null })
+        });
+        const data = await resp.json();
+
+        let badgeClass = 'pill-warning';
+        if (data.label === 'Likely Reliable') badgeClass = 'pill-reliable';
+        if (data.label === 'Potential Fake/Misinformation') badgeClass = 'pill-fake';
+
+        resContainer.className = 'feed-inline-result';
+        if (data.label === 'Likely Reliable') resContainer.style.background = 'var(--color-reliable-bg)';
+        else if (data.label === 'Potential Fake/Misinformation') resContainer.style.background = 'var(--color-fake-bg)';
+        else resContainer.style.background = 'var(--color-warning-bg)';
+
+        resContainer.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span class="badge-pill ${badgeClass}">${data.label}</span>
+            <span style="font-size:12px; font-weight:700;">Risk Score: ${data.risk_score}/100</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-main); line-height:1.4;">
+            ${(data.reasons || [])[0] || 'Triage completed based on multi-factor analysis.'}
+          </div>
+        `;
+        fetchStats();
+      } catch (err) {
+        resContainer.innerHTML = `<span style="color:#f87171; font-size:12px;">Failed to verify: ${err.message}</span>`;
+      }
+    }
+
+    // Feedback
+    async function sendFeedback(verdict) {
+      if (!currentAnalysisId) return;
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ analysis_id: currentAnalysisId, verdict })
+        });
+        alert('Thank you! Your feedback has been recorded in the TruthGuard audit log.');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Stats
+    async function fetchStats() {
+      try {
+        const resp = await fetch('/api/stats');
+        const data = await resp.json();
+        document.getElementById('statTotalCount').textContent = data.total_analyses || 0;
+        document.getElementById('statFakesCount').textContent = data.labels['Potential Fake/Misinformation'] || 0;
+        document.getElementById('statReliableCount').textContent = data.labels['Likely Reliable'] || 0;
+      } catch (err) {
+        console.log('Stats error:', err);
+      }
+    }
+
+    // History Table
+    async function loadHistory() {
+      const tbody = document.getElementById('historyTableBody');
+      try {
+        const resp = await fetch('/api/history?limit=25');
+        const data = await resp.json();
+        tbody.innerHTML = '';
+        if (!data.history || data.history.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No analyses logged yet.</td></tr>';
+          return;
+        }
+
+        data.history.forEach(row => {
+          let pill = 'pill-warning';
+          if (row.label === 'Likely Reliable') pill = 'pill-reliable';
+          if (row.label === 'Potential Fake/Misinformation') pill = 'pill-fake';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><span class="badge-pill ${pill}">${row.label}</span></td>
+            <td><strong>${row.risk}</strong>/100</td>
+            <td>${(row.confidence * 100).toFixed(0)}%</td>
+            <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(row.text)}</td>
+            <td style="color:var(--text-dim);">${row.url ? escapeHtml(row.url) : '—'}</td>
+            <td style="color:var(--text-dim); font-size:11px;">${new Date(row.created).toLocaleTimeString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#f87171; padding:20px;">Failed to load history: ${err.message}</td></tr>`;
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Init
+    fetchStats();
+  </script>
+</body>
+</html>
