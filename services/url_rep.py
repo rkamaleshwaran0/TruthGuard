@@ -14,11 +14,16 @@ KNOWN_CREDIBLE = {
     # Official & Scientific Agencies
     "pib.gov.in", "isro.gov.in", "who.int", "cdc.gov", "nasa.gov", "un.org",
     "nature.com", "sciencemag.org", "nih.gov", "rbi.org.in", "eci.gov.in",
-    # Mainstream News Outlets
+    "whitehouse.gov", "gov.uk", "europa.eu", "unicef.org",
+    # Mainstream Global & Regional News Outlets
     "reuters.com", "apnews.com", "bbc.com", "bbc.co.uk", "thehindu.com",
     "ndtv.com", "indianexpress.com", "hindustantimes.com", "timesofindia.indiatimes.com",
     "thewire.in", "scroll.in", "dinamalar.com", "dailythanthi.com", "dainikbhaskar.com",
-    "amarujala.com", "navbharattimes.indiatimes.com", "nytimes.com", "washingtonpost.com"
+    "amarujala.com", "navbharattimes.indiatimes.com", "nytimes.com", "washingtonpost.com",
+    "cnn.com", "bloomberg.com", "aljazeera.com", "wsj.com", "theguardian.com",
+    "cnbc.com", "ft.com", "economist.com", "indiatoday.in", "news18.com",
+    "livemint.com", "moneycontrol.com", "theprint.in", "nationalgeographic.com",
+    "scientificamerican.com", "wikipedia.org"
 }
 
 KNOWN_SATIRE = {

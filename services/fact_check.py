@@ -172,23 +172,52 @@ class FactCheckMatcher:
         # Check Google Fact Check API first if key provided
         google_result = self.query_google_factcheck(query_text)
 
-        # Generate embedding for query text using FastEmbed
-        query_raw = list(self.embed_model.embed([query_text]))[0]
-        query_arr = np.array(query_raw, dtype=np.float32)
-        q_norm = np.linalg.norm(query_arr)
-        if q_norm > 0:
-            query_arr = query_arr / q_norm
+        # Collect candidate query forms: full text, clean text, and individual sentences
+        candidates = [query_text]
+        cleaned_main = re.sub(
+            r'^(breaking(\s+news)?|viral|alert|shocking|must\s+watch|watch|important|urgent|did\s+you\s+know|fact\s*check)[\s:!\-]+',
+            '',
+            query_text,
+            flags=re.IGNORECASE
+        ).strip()
+        if cleaned_main and cleaned_main != query_text and len(cleaned_main) >= 12:
+            candidates.append(cleaned_main)
+
+        # Split into constituent sentences or clauses
+        sentences = [s.strip() for s in re.split(r'[\r\n.!?]+', query_text) if len(s.strip()) >= 15]
+        for s in sentences:
+            if s not in candidates:
+                candidates.append(s)
+            s_clean = re.sub(
+                r'^(breaking(\s+news)?|viral|alert|shocking|must\s+watch|watch|important|urgent|did\s+you\s+know|fact\s*check)[\s:!\-]+',
+                '',
+                s,
+                flags=re.IGNORECASE
+            ).strip()
+            if s_clean and s_clean not in candidates and len(s_clean) >= 12:
+                candidates.append(s_clean)
+
+        # Generate embeddings for candidate queries in batch using FastEmbed
+        cand_embeds = list(self.embed_model.embed(candidates))
 
         top_match = None
         top_sim = 0.0
+        best_candidate = query_text
 
         if self.seed_embeddings is not None and len(self.seed_claims) > 0:
-            # Cosine similarities via matrix dot product
-            similarities = np.dot(self.seed_embeddings, query_arr)
-            best_idx = int(np.argmax(similarities))
-            top_sim = float(similarities[best_idx])
-            top_match = dict(self.seed_claims[best_idx])
-            top_match["source"] = "seed_database"
+            for cand_text, cand_raw in zip(candidates, cand_embeds):
+                cand_arr = np.array(cand_raw, dtype=np.float32)
+                c_norm = np.linalg.norm(cand_arr)
+                if c_norm > 0:
+                    cand_arr = cand_arr / c_norm
+                similarities = np.dot(self.seed_embeddings, cand_arr)
+                best_idx = int(np.argmax(similarities))
+                sim_val = float(similarities[best_idx])
+                if sim_val > top_sim:
+                    top_sim = sim_val
+                    best_candidate = cand_text
+                    top_match = dict(self.seed_claims[best_idx])
+                    top_match["source"] = "seed_database"
 
         # If Google result exists, compare or prioritize
         if google_result and top_sim < 0.80:
@@ -207,12 +236,18 @@ class FactCheckMatcher:
         verdict = top_match.get("verdict", "unknown").lower()
         matched_claim_text = top_match.get("claim", "")
 
-        # Check polarity conflict
-        has_polarity_conflict = self.detect_polarity_conflict(
+        # Check polarity conflict against full query AND best candidate
+        conflict_full = self.detect_polarity_conflict(
             query_text=query_text,
             matched_claim_text=matched_claim_text,
             matched_verdict=verdict
         )
+        conflict_cand = self.detect_polarity_conflict(
+            query_text=best_candidate,
+            matched_claim_text=matched_claim_text,
+            matched_verdict=verdict
+        )
+        has_polarity_conflict = conflict_full or conflict_cand
 
         # STRICT EVIDENCE-FIRST DEFINITION:
         # Strong Match = similarity >= 0.80 AND verdict in ("true", "false") AND not polarity_conflict

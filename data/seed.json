@@ -295,5 +295,115 @@
     "url": "https://sciencefeedback.co/intermittent-fasting-diabetes-remission-evidence/",
     "language": "en",
     "explanation": "Caloric restriction and fasting can aid glycemic control in some patients under medical supervision, but cannot guarantee reversal in all cases."
+  },
+  {
+    "id": "FC-EN-010",
+    "claim": "World Health Organization and global health agencies confirm approved COVID-19 vaccines are safe and effective",
+    "verdict": "true",
+    "claimant": "Health Authorities",
+    "publisher": "WHO & HealthFeedback",
+    "review_date": "2024-01-20",
+    "url": "https://healthfeedback.org/covid-19-vaccines-safety-efficacy-summary/",
+    "language": "en",
+    "explanation": "Extensive international clinical data confirm approved COVID-19 vaccines drastically reduce severe illness and hospitalization."
+  },
+  {
+    "id": "FC-EN-011",
+    "claim": "ISRO successfully inserted India's solar observatory spacecraft Aditya-L1 into halo orbit around Lagrange point L1",
+    "verdict": "true",
+    "claimant": "ISRO Official Press",
+    "publisher": "PIB Fact Check",
+    "review_date": "2024-01-06",
+    "url": "https://www.isro.gov.in/Aditya_L1.html",
+    "language": "en",
+    "explanation": "ISRO confirmed Aditya-L1 successfully entered its designated halo orbit around the Sun-Earth L1 point on January 6, 2024."
+  },
+  {
+    "id": "FC-EN-012",
+    "claim": "Consuming raw onions with rock salt kills all viruses and cures infections within 15 minutes",
+    "verdict": "false",
+    "claimant": "Viral Social Media Posts",
+    "publisher": "BoomLive",
+    "review_date": "2023-12-08",
+    "url": "https://www.boomlive.in/fact-check/raw-onion-rock-salt-cure-virus-hoax",
+    "language": "en",
+    "explanation": "Medical experts and doctors clarify eating onions with salt cannot cure viral infections or act as an anti-viral remedy."
+  },
+  {
+    "id": "FC-EN-013",
+    "claim": "Supreme Court of India ordered a complete permanent ban on WhatsApp and social media platforms",
+    "verdict": "false",
+    "claimant": "Viral WhatsApp Forward",
+    "publisher": "Factly",
+    "review_date": "2024-03-12",
+    "url": "https://factly.in/sc-ban-whatsapp-social-media-fake-claim",
+    "language": "en",
+    "explanation": "The Supreme Court has made no such ruling; the claim is a fabricated viral forward."
+  },
+  {
+    "id": "FC-TA-010",
+    "claim": "அங்கீகரிக்கப்பட்ட கொரோனா தடுப்பூசிகள் பாதுகாப்பானவை மற்றும் தீவிர நோய்த்தொற்றைத் தடுக்கின்றன",
+    "verdict": "true",
+    "claimant": "சுகாதாரத்துறை தகவல்கள்",
+    "publisher": "BoomLive Tamil",
+    "review_date": "2024-01-20",
+    "url": "https://tamil.boomlive.in/fact-check/vaccine-safety-efficacy-facts",
+    "language": "ta",
+    "explanation": "உலக சுகாதார நிறுவனம் மற்றும் இந்திய சுகாதார அமைச்சகம் கொரோனா தடுப்பூசிகள் பாதுகாப்பானவை என்பதை உறுதிப்படுத்தியுள்ளன."
+  },
+  {
+    "id": "FC-TA-011",
+    "claim": "ஆதித்யா எல்1 விண்கலத்தை சூரியனின் லாக்ராஞ்சியன் புள்ளி எல்1 சுற்றுப்பாதையில் இஸ்ரோ வெற்றிகரமாக நிலைநிறுத்தியது",
+    "verdict": "true",
+    "claimant": "இஸ்ரோ அதிகாரப்பூர்வ செய்தி",
+    "publisher": "FactCrescendo Tamil",
+    "review_date": "2024-01-06",
+    "url": "https://tamil.factcrescendo.com/isro-aditya-l1-successful-orbit-insertion",
+    "language": "ta",
+    "explanation": "இஸ்ரோ 2024 ஜனவரி 6 அன்று ஆதித்யா எல்1 விண்கலத்தை எல்1 புள்ளியில் வெற்றிகரமாக நிலைநிறுத்தியது."
+  },
+  {
+    "id": "FC-TA-012",
+    "claim": "கல் உப்புடன் பச்சையான வெங்காயம் சாப்பிட்டால் மனித உடலில் உள்ள அனைத்து வைரஸ்களும் 15 நிமிடங்களில் அழியும்",
+    "verdict": "false",
+    "claimant": "வாட்ஸ்அப் வதந்தி",
+    "publisher": "YouTurn Tamil",
+    "review_date": "2023-12-08",
+    "url": "https://youturn.in/factcheck/raw-onion-salt-cure-virus-rumour.html",
+    "language": "ta",
+    "explanation": "வெங்காயமும் உப்பும் உட்கொள்வதால் எந்த வைரஸ் தொற்றும் அழியாது என்று மருத்துவர்கள் தெளிவுபடுத்தியுள்ளனர்."
+  },
+  {
+    "id": "FC-HI-010",
+    "claim": "विश्व स्वास्थ्य संगठन ने पुष्टि की है कि स्वीकृत कोविड-19 टीके सुरक्षित और गंभीर बीमारी से बचाने में प्रभावी हैं",
+    "verdict": "true",
+    "claimant": "स्वास्थ्य विशेषज्ञ",
+    "publisher": "Vishvas News Hindi",
+    "review_date": "2024-01-20",
+    "url": "https://www.vishvasnews.com/health/fact-check-covid-vaccine-safety-and-efficacy/",
+    "language": "hi",
+    "explanation": "डब्ल्यूएचओ और आईसीएमआर के अनुसार स्वीकृत कोविड-19 टीके पूरी तरह सुरक्षित और प्रभावी हैं।"
+  },
+  {
+    "id": "FC-HI-011",
+    "claim": "इसरो ने भारत के पहले सूर्य मिशन आदित्य एल1 को हेलो ऑर्बिट में सफलतापूर्वक स्थापित किया",
+    "verdict": "true",
+    "claimant": "इसरो आधिकारिक प्रेस",
+    "publisher": "Dainik Bhaskar Fact Check",
+    "review_date": "2024-01-06",
+    "url": "https://www.bhaskar.com/db-original/fact-check/isro-aditya-l1-halo-orbit-insertion-success",
+    "language": "hi",
+    "explanation": "6 जनवरी 2024 को इसरो ने आदित्य एल1 उपग्रह को एल1 बिंदु के हेलो ऑर्बिट में सफलतापूर्वक स्थापित किया।"
+  },
+  {
+    "id": "FC-HI-012",
+    "claim": "कच्चा प्याज और सेंधा नमक एक साथ खाने से शरीर के सारे वायरस 15 मिनट में खत्म हो जाते हैं",
+    "verdict": "false",
+    "claimant": "व्हाट्सएप फॉरवर्ड",
+    "publisher": "BoomLive Hindi",
+    "review_date": "2023-12-08",
+    "url": "https://hindi.boomlive.in/fact-check/raw-onion-rock-salt-cure-all-viruses-fake-claim",
+    "language": "hi",
+    "explanation": "यह दावा पूरी तरह भ्रामक और वैज्ञानिक आधार से रहित है; प्याज और नमक किसी वायरस को समाप्त नहीं करते।"
   }
 ]

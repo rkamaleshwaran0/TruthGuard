@@ -85,6 +85,21 @@ def fuse_analysis(text: str, claim: Optional[str] = None, url: Optional[str] = N
         if ref_url:
             reasons.append(f"Verified Reference Source: {ref_url}")
 
+    elif (
+        url_result.get("domain_tier") == "credible" and
+        ling_result.get("risk_score", 0) <= 25 and
+        not ml_result.get("is_fake", False) and
+        not (matched_claim_data and verdict == "false") and
+        not has_polarity_conflict
+    ):
+        label = LABEL_RELIABLE
+        domain_name = url_result.get("domain", "verified publisher")
+        risk_score = int(max(8, min(22, round(url_result["domain_risk"] * 0.7 + ling_result["risk_score"] * 0.2 + ml_result["fake_prob"] * 15.0))))
+        confidence = 0.90
+        reasons.append(
+            f"Recognized Credible Source: Content published directly on '{domain_name}', an accredited journalism outlet or official institution with neutral linguistic framing."
+        )
+
     else:
         # ALL OTHER CASES MUST RETURN "Needs Verification"
         label = LABEL_NEEDS_VERIFICATION

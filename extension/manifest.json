@@ -5,7 +5,8 @@
   "description": "Explainable real-time misinformation triage and fact-checking directly inside your browser.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
     "http://127.0.0.1:8000/*",
