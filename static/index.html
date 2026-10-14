@@ -1663,8 +1663,8 @@
       document.getElementById('submetricML').textContent = `${(ml.fake_prob * 100).toFixed(1)}% (${ml.is_fake ? 'Fake Pattern' : 'Reliable Syntax'})`;
 
       const fc = data.breakdown.fact_check;
-      document.getElementById('submetricMatch').textContent = fc.matched 
-        ? `${(fc.similarity * 100).toFixed(1)}% (${fc.verdict})` 
+      document.getElementById('submetricMatch').textContent = fc.matched
+        ? `${(fc.similarity * 100).toFixed(1)}% (${fc.verdict})`
         : 'No Direct Evidence';
     }
 
