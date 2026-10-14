@@ -4,37 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TruthGuard — Explainable Real-Time Misinformation Assistant</title>
-  <meta name="description" content="AI-driven, explainable misinformation triage and fact-checking assistant powered by FastEmbed ONNX multilingual embeddings, Scikit-Learn, and FastAPI.">
+  <meta name="description" content="AI-driven, explainable misinformation triage and fact-checking assistant powered by FastEmbed ONNX multilingual embeddings, Scikit-Learn NLP, and FastAPI.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #07090e;
-      --bg-surface: #0d121d;
-      --bg-card: rgba(18, 24, 38, 0.75);
-      --bg-card-hover: rgba(26, 34, 53, 0.85);
+      --bg-base: #060911;
+      --bg-surface: #0c1220;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(22, 34, 61, 0.85);
+      --bg-card-subtle: rgba(30, 41, 69, 0.5);
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-highlight: rgba(99, 102, 241, 0.35);
+      --border-highlight: rgba(99, 102, 241, 0.4);
+      --border-focus: rgba(99, 102, 241, 0.6);
 
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --text-dim: #6b7280;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
 
       --brand: #6366f1;
+      --brand-gradient: linear-gradient(135deg, #4f46e5, #06b6d4);
       --brand-glow: rgba(99, 102, 241, 0.35);
 
       --color-reliable: #10b981;
-      --color-reliable-glow: rgba(16, 185, 129, 0.25);
+      --color-reliable-glow: rgba(16, 185, 129, 0.3);
       --color-reliable-bg: rgba(16, 185, 129, 0.12);
+      --color-reliable-border: rgba(16, 185, 129, 0.35);
 
       --color-warning: #f59e0b;
-      --color-warning-glow: rgba(245, 158, 11, 0.25);
+      --color-warning-glow: rgba(245, 158, 11, 0.3);
       --color-warning-bg: rgba(245, 158, 11, 0.12);
+      --color-warning-border: rgba(245, 158, 11, 0.35);
 
       --color-fake: #ef4444;
-      --color-fake-glow: rgba(239, 68, 68, 0.25);
+      --color-fake-glow: rgba(239, 68, 68, 0.3);
       --color-fake-bg: rgba(239, 68, 68, 0.12);
+      --color-fake-border: rgba(239, 68, 68, 0.35);
 
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -55,17 +61,16 @@
       min-height: 100vh;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 50% 80%, rgba(239, 68, 68, 0.06) 0%, transparent 50%);
+        radial-gradient(circle at 10% 5%, rgba(99, 102, 241, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 90% 15%, rgba(16, 185, 129, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(239, 68, 68, 0.08) 0%, transparent 50%);
       background-attachment: fixed;
     }
 
-    /* Container */
     .container {
-      max-width: 1240px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px 20px 80px;
+      padding: 24px 24px 80px;
     }
 
     /* Header */
@@ -73,8 +78,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 0 32px;
+      padding: 16px 0 28px;
       border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
     }
 
     .brand-group {
@@ -84,19 +90,19 @@
     }
 
     .brand-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--brand-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 20px var(--brand-glow);
+      box-shadow: 0 0 24px var(--brand-glow);
     }
 
     .brand-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       fill: none;
       stroke: white;
       stroke-width: 2.2;
@@ -104,30 +110,30 @@
 
     .brand-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(90deg, #ffffff, #c7d2fe);
+      background: linear-gradient(90deg, #ffffff 30%, #c7d2fe);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .brand-tag {
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      background: rgba(99, 102, 241, 0.18);
+      background: rgba(99, 102, 241, 0.2);
       color: #a5b4fc;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 6px;
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(99, 102, 241, 0.35);
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
     .status-badge {
@@ -135,12 +141,12 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--color-reliable);
       background: var(--color-reliable-bg);
       padding: 6px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid var(--color-reliable-border);
     }
 
     .status-pulse {
@@ -154,15 +160,15 @@
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 0.4; transform: scale(0.8); }
     }
 
-    /* Hero / Stat Bar */
+    /* Hero / Stat Overview */
     .hero-banner {
-      margin: 32px 0 36px;
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 16px;
+      margin-bottom: 28px;
     }
 
     .hero-text-card {
@@ -174,19 +180,24 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     .hero-text-card h1 {
       font-family: 'Outfit', sans-serif;
       font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 6px;
+      font-weight: 800;
+      margin-bottom: 8px;
       letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff 40%, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .hero-text-card p {
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 13.5px;
+      line-height: 1.5;
     }
 
     .stat-card {
@@ -199,7 +210,8 @@
       flex-direction: column;
       justify-content: center;
       text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
+      transition: all 0.2s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     .stat-card:hover {
@@ -209,26 +221,29 @@
 
     .stat-number {
       font-family: 'Outfit', sans-serif;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
       color: #ffffff;
-      margin-bottom: 2px;
+      line-height: 1.1;
+      margin-bottom: 4px;
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-muted);
+      font-weight: 700;
     }
 
     /* Tab Navigation */
     .tab-bar {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 24px;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 12px;
+      overflow-x: auto;
     }
 
     .tab-btn {
@@ -236,7 +251,7 @@
       border: 1px solid transparent;
       color: var(--text-muted);
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       padding: 10px 18px;
       border-radius: var(--radius-sm);
@@ -245,30 +260,42 @@
       align-items: center;
       gap: 8px;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .tab-btn:hover {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .tab-btn.active {
-      background: rgba(99, 102, 241, 0.15);
-      border-color: rgba(99, 102, 241, 0.35);
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.4);
       color: #c7d2fe;
     }
 
-    /* Section Grid */
+    .tab-badge {
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    /* Main Grid */
     .main-grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 24px;
       align-items: start;
     }
 
-    @media (max-width: 992px) {
-      .hero-banner { grid-template-columns: 1fr; }
+    @media (max-width: 1024px) {
+      .hero-banner { grid-template-columns: 1fr 1fr; }
       .main-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .hero-banner { grid-template-columns: 1fr; }
     }
 
     /* Cards */
@@ -285,7 +312,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .card-title {
@@ -295,33 +322,61 @@
       letter-spacing: -0.3px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    /* Presets Chips */
-    .preset-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .preset-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    /* Multilingual Presets Filter */
+    .preset-section {
       margin-bottom: 18px;
     }
 
-    .chip {
-      background: rgba(255, 255, 255, 0.05);
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 8px;
+    }
+
+    .preset-categories {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .cat-btn {
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+    }
+
+    .preset-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 500;
       padding: 6px 12px;
       border-radius: 999px;
       cursor: pointer;
@@ -332,32 +387,44 @@
     .chip:hover {
       background: rgba(99, 102, 241, 0.15);
       border-color: rgba(99, 102, 241, 0.4);
-      color: #e0e7ff;
+      color: #ffffff;
       transform: translateY(-1px);
     }
+    .chip.chip-fake:hover {
+      border-color: var(--color-fake);
+      color: #fca5a5;
+    }
+    .chip.chip-true:hover {
+      border-color: var(--color-reliable);
+      color: #86efac;
+    }
 
-    /* Input Controls */
+    /* Forms */
     .form-group {
       margin-bottom: 16px;
     }
 
     .form-label {
-      display: block;
+      display: flex;
+      justify-content: space-between;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
       margin-bottom: 6px;
     }
 
-    textarea, input[type="text"] {
+    textarea {
       width: 100%;
-      background: rgba(10, 14, 23, 0.85);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 14px;
       padding: 12px 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      line-height: 1.5;
+      min-height: 90px;
+      resize: vertical;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -367,48 +434,50 @@
       box-shadow: 0 0 0 3px var(--brand-glow);
     }
 
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-      line-height: 1.5;
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .input-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-dim);
-      margin-top: 4px;
+      margin-top: 5px;
     }
 
-    /* Primary CTA */
     .btn-primary {
       width: 100%;
       background: linear-gradient(135deg, #4f46e5, #6366f1);
       color: white;
       border: none;
-      padding: 14px 20px;
+      padding: 12px;
       border-radius: var(--radius-sm);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 15px;
+      font-family: 'Outfit', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.2px;
+      font-size: 15px;
+      letter-spacing: -0.2px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 18px var(--brand-glow);
-      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 18px rgba(79, 70, 229, 0.35);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.95;
       transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
+      box-shadow: 0 6px 22px rgba(79, 70, 229, 0.45);
     }
 
     .btn-primary:disabled {
@@ -416,10 +485,10 @@
       cursor: not-allowed;
     }
 
-    /* Result Panel */
+    /* Result Card Styling */
     .empty-result-state {
+      padding: 50px 20px;
       text-align: center;
-      padding: 40px 20px;
       color: var(--text-dim);
     }
 
@@ -428,91 +497,77 @@
       height: 48px;
       margin: 0 auto 12px;
       stroke: var(--text-dim);
+      opacity: 0.5;
     }
 
-    /* Triage Hero in Result */
+    /* Triage Hero Display */
     .triage-display {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 20px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
+      padding: 18px;
       margin-bottom: 20px;
-      border: 1px solid transparent;
-      animation: fadeIn 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .triage-display::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
     }
 
-    .triage-display.label-reliable {
-      background: var(--color-reliable-bg);
-      border-color: rgba(16, 185, 129, 0.35);
-      box-shadow: 0 0 25px var(--color-reliable-glow);
-    }
-
-    .triage-display.label-warning {
-      background: var(--color-warning-bg);
-      border-color: rgba(245, 158, 11, 0.35);
-      box-shadow: 0 0 25px var(--color-warning-glow);
-    }
-
-    .triage-display.label-fake {
-      background: var(--color-fake-bg);
-      border-color: rgba(239, 68, 68, 0.35);
-      box-shadow: 0 0 25px var(--color-fake-glow);
-    }
+    .label-reliable::before { background: var(--color-reliable); }
+    .label-warning::before { background: var(--color-warning); }
+    .label-fake::before { background: var(--color-fake); }
 
     .triage-badge-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .triage-badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 16px;
+      gap: 8px;
+      padding: 6px 14px;
       border-radius: 999px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 16px;
+      font-size: 13.5px;
       font-weight: 800;
-      letter-spacing: 0.2px;
+      letter-spacing: -0.2px;
     }
 
     .badge-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
     }
 
     .label-reliable .triage-badge {
-      background: #064e3b;
-      color: #34d399;
-      border: 1px solid #10b981;
+      background: var(--color-reliable-bg);
+      color: var(--color-reliable);
+      border: 1px solid var(--color-reliable-border);
     }
-    .label-reliable .badge-dot { background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .label-reliable .badge-dot { background: var(--color-reliable); }
 
     .label-warning .triage-badge {
-      background: #78350f;
-      color: #fbbf24;
-      border: 1px solid #f59e0b;
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border: 1px solid var(--color-warning-border);
     }
-    .label-warning .badge-dot { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+    .label-warning .badge-dot { background: var(--color-warning); }
 
     .label-fake .triage-badge {
-      background: #7f1d1d;
-      color: #f87171;
-      border: 1px solid #ef4444;
+      background: var(--color-fake-bg);
+      color: var(--color-fake);
+      border: 1px solid var(--color-fake-border);
     }
-    .label-fake .badge-dot { background: #f87171; box-shadow: 0 0 8px #f87171; }
+    .label-fake .badge-dot { background: var(--color-fake); }
 
-    /* Risk Score Gauge Area */
+    /* Risk Score Gauge */
     .risk-score-display {
       display: flex;
       align-items: center;
@@ -527,23 +582,22 @@
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      font-weight: 600;
       color: var(--text-dim);
-      margin-bottom: 4px;
+      font-weight: 600;
+      margin-bottom: 6px;
     }
 
     .risk-bar-track {
-      height: 10px;
-      background: rgba(0, 0, 0, 0.4);
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid var(--border-subtle);
     }
 
     .risk-bar-fill {
       height: 100%;
       border-radius: 999px;
-      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .label-reliable .risk-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); }
@@ -552,13 +606,13 @@
 
     .risk-number-box {
       text-align: right;
-      min-width: 70px;
+      min-width: 80px;
     }
 
     .risk-number {
       font-family: 'Outfit', sans-serif;
-      font-size: 26px;
-      font-weight: 800;
+      font-size: 28px;
+      font-weight: 900;
       line-height: 1;
     }
 
@@ -567,27 +621,28 @@
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-dim);
+      font-weight: 700;
     }
 
-    /* Submetrics Grid */
+    /* Submetrics 4-Pillars Grid */
     .submetrics-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 20px;
     }
 
     .submetric-box {
-      background: rgba(10, 14, 23, 0.6);
+      background: var(--bg-card-subtle);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 12px 14px;
     }
 
     .submetric-title {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
@@ -600,7 +655,54 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
       font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Matched Fact Card */
+    .matched-fact-box {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .matched-fact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #a5b4fc;
+      margin-bottom: 6px;
+    }
+
+    .matched-claim-text {
+      font-size: 13.5px;
+      font-weight: 500;
       color: #ffffff;
+      margin-bottom: 8px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .matched-fact-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .matched-fact-meta a {
+      color: #818cf8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .matched-fact-meta a:hover {
+      text-decoration: underline;
     }
 
     /* Reasons List */
@@ -609,11 +711,11 @@
     }
 
     .reasons-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--text-muted);
+      color: var(--text-dim);
       margin-bottom: 8px;
     }
 
@@ -625,104 +727,51 @@
     }
 
     .reason-item {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-main);
-      background: rgba(10, 14, 23, 0.5);
+      background: var(--bg-card-subtle);
       border-left: 3px solid var(--brand);
       padding: 8px 12px;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      line-height: 1.4;
     }
 
-    .reason-item.flag-warning {
-      border-left-color: var(--color-warning);
-    }
+    .reason-item.flag-warning { border-left-color: var(--color-warning); }
+    .reason-item.flag-fake { border-left-color: var(--color-fake); }
+    .reason-item.flag-reliable { border-left-color: var(--color-reliable); }
 
-    .reason-item.flag-fake {
-      border-left-color: var(--color-fake);
-    }
-
-    .reason-item.flag-reliable {
-      border-left-color: var(--color-reliable);
-    }
-
-    /* Matched Fact Card */
-    .matched-fact-box {
-      background: rgba(10, 14, 23, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      margin-bottom: 20px;
-    }
-
-    .matched-fact-header {
+    /* Report Action Bar */
+    .report-action-bar {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #a5b4fc;
-      margin-bottom: 6px;
-    }
-
-    .matched-claim-text {
-      font-size: 13px;
-      font-weight: 500;
-      color: #ffffff;
-      margin-bottom: 8px;
-      font-style: italic;
-    }
-
-    .matched-fact-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .matched-fact-meta a {
-      color: #818cf8;
-      text-decoration: none;
-    }
-
-    .matched-fact-meta a:hover {
-      text-decoration: underline;
-    }
-
-    /* Feedback widget */
-    .feedback-section {
+      align-items: center;
       border-top: 1px solid var(--border-subtle);
       padding-top: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .feedback-text {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
-    .feedback-btns {
+    .action-btn-group {
       display: flex;
       gap: 8px;
     }
 
-    .feedback-btn {
+    .btn-secondary {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
       font-size: 12px;
-      padding: 5px 12px;
+      font-weight: 600;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.2s;
     }
 
-    .feedback-btn:hover {
+    .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
     }
@@ -739,11 +788,12 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       padding: 20px;
-      transition: border-color 0.2s;
+      transition: all 0.2s ease;
     }
 
     .feed-item-card:hover {
       border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
     }
 
     .feed-author-row {
@@ -757,23 +807,16 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #374151, #1f2937);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 15px;
-      color: #9ca3af;
-    }
-
-    .feed-meta {
-      flex: 1;
+      font-weight: 800;
+      font-size: 14px;
     }
 
     .feed-author-name {
-      font-size: 14px;
       font-weight: 700;
-      color: #ffffff;
+      font-size: 14px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -786,27 +829,27 @@
 
     .feed-content {
       font-size: 14px;
-      color: var(--text-main);
-      margin-bottom: 14px;
       line-height: 1.5;
+      margin-bottom: 14px;
+      color: var(--text-main);
     }
 
     .feed-action-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 10px;
       border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
     }
 
     .btn-verify-feed {
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.35);
+      background: rgba(99, 102, 241, 0.18);
+      border: 1px solid rgba(99, 102, 241, 0.4);
       color: #c7d2fe;
+      padding: 6px 14px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -815,7 +858,7 @@
     }
 
     .btn-verify-feed:hover {
-      background: rgba(99, 102, 241, 0.3);
+      background: rgba(99, 102, 241, 0.35);
       color: #ffffff;
     }
 
@@ -824,9 +867,90 @@
       padding: 14px;
       border-radius: var(--radius-sm);
       display: none;
+      animation: fadeIn 0.2s ease-out;
     }
 
-    /* History View (Tab 3) */
+    /* Knowledge Base Cards (Tab 3) */
+    .kb-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .kb-search-box {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .kb-filter-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .kb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .kb-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .kb-card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-2px);
+    }
+
+    .kb-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .kb-claim {
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .kb-expl {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .kb-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* History Table (Tab 4) */
+    .history-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
     .history-table {
       width: 100%;
       border-collapse: collapse;
@@ -835,18 +959,18 @@
 
     .history-table th {
       text-align: left;
-      padding: 12px 14px;
-      color: var(--text-dim);
+      padding: 10px 14px;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.6px;
+      color: var(--text-dim);
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .history-table td {
       padding: 12px 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-main);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
     }
 
     .history-table tr:hover td {
@@ -861,9 +985,34 @@
       font-weight: 700;
     }
 
-    .badge-pill.pill-reliable { background: var(--color-reliable-bg); color: var(--color-reliable); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-pill.pill-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-pill.pill-fake { background: var(--color-fake-bg); color: var(--color-fake); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-pill.pill-reliable { background: var(--color-reliable-bg); color: var(--color-reliable); border: 1px solid var(--color-reliable-border); }
+    .badge-pill.pill-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+    .badge-pill.pill-fake { background: var(--color-fake-bg); color: var(--color-fake); border: 1px solid var(--color-fake-border); }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid var(--brand);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 9999;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
     /* Footer */
     footer {
@@ -892,7 +1041,7 @@
             <span class="brand-title">TruthGuard</span>
             <span class="brand-tag">Explainable AI</span>
           </div>
-          <div style="font-size: 12px; color: var(--text-dim);">Real-Time Multilingual Misinformation Triage</div>
+          <div style="font-size: 12.5px; color: var(--text-dim);">Real-Time Multilingual Misinformation Triage Engine</div>
         </div>
       </div>
 
@@ -908,7 +1057,7 @@
     <div class="hero-banner">
       <div class="hero-text-card">
         <h1>Explainable Real-Time Misinformation Assistant</h1>
-        <p>Built with strict evidence-first classification, quantized multilingual ONNX embeddings (English, தமிழ், हिन्दी), stylometric heuristics, and scikit-learn ML inference.</p>
+        <p>Strict evidence-first decision engine integrating quantized FastEmbed ONNX embeddings (English, தமிழ், हिन्दी), stylometric sensationalism analysis, domain reputation auditing, and Scikit-Learn ML inference.</p>
       </div>
       <div class="stat-card">
         <div class="stat-number" id="statTotalCount">0</div>
@@ -924,7 +1073,7 @@
       </div>
     </div>
 
-    <!-- Tab Navigation -->
+    <!-- Tab Navigation Bar -->
     <div class="tab-bar">
       <button class="tab-btn active" id="tabBtnInspector" onclick="switchTab('inspector')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -932,7 +1081,12 @@
       </button>
       <button class="tab-btn" id="tabBtnFeed" onclick="switchTab('feed')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-        Simulated Social Media Feed
+        Simulated Social Stream
+      </button>
+      <button class="tab-btn" id="tabBtnKB" onclick="switchTab('kb')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Fact-Check Knowledge Base
+        <span class="tab-badge" id="kbCountBadge">37</span>
       </button>
       <button class="tab-btn" id="tabBtnHistory" onclick="switchTab('history')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -953,40 +1107,44 @@
             <span style="font-size: 12px; color: var(--text-dim);">Strict Evidence-First</span>
           </div>
 
-          <!-- Quick Presets -->
-          <div class="preset-label">
-            <span>Quick Test Presets (English • தமிழ் • हिन्दी)</span>
-            <span style="cursor:pointer; color:#818cf8;" onclick="clearInputs()">Clear</span>
-          </div>
-          <div class="preset-chips">
-            <div class="chip" onclick="loadPreset('en-fake')">🇬🇧 RBI 1000 GPS Chip</div>
-            <div class="chip" onclick="loadPreset('en-true')">🇬🇧 ISRO Chandrayaan-3</div>
-            <div class="chip" onclick="loadPreset('ta-fake')">🇮🇳 புதிய 2000 நோட்டு ஜிபிஎஸ்</div>
-            <div class="chip" onclick="loadPreset('ta-true')">🇮🇳 நிலவில் சந்திரயான் 3</div>
-            <div class="chip" onclick="loadPreset('hi-fake')">🇮🇳 2000 नोट में नैनो चिप</div>
-            <div class="chip" onclick="loadPreset('hi-true')">🇮🇳 चंद्रयान 3 सफल लैंडिंग</div>
-            <div class="chip" onclick="loadPreset('polarity')">⚖️ Polarity Safeguard</div>
-            <div class="chip" onclick="loadPreset('ling-extreme')">🚨 Sensational Clickbait</div>
+          <!-- Quick Multilingual Presets -->
+          <div class="preset-section">
+            <div class="preset-header">
+              <span>Quick Test Presets</span>
+              <span style="cursor:pointer; color:#818cf8; text-transform:none;" onclick="clearInputs()">Clear All</span>
+            </div>
+            <div class="preset-categories">
+              <button class="cat-btn active" onclick="filterPresets('all')">All</button>
+              <button class="cat-btn" onclick="filterPresets('en')">🇬🇧 English</button>
+              <button class="cat-btn" onclick="filterPresets('ta')">🇮🇳 தமிழ்</button>
+              <button class="cat-btn" onclick="filterPresets('hi')">🇮🇳 हिन्दी</button>
+              <button class="cat-btn" onclick="filterPresets('special')">⚖️ Edge Cases</button>
+            </div>
+            <div class="preset-chips-wrap" id="presetChipsWrap">
+              <!-- Dynamically populated or rendered -->
+            </div>
           </div>
 
           <form id="analyzeForm" onsubmit="handleAnalyzeSubmit(event)">
             <div class="form-group">
-              <label class="form-label" for="inputText">Claim / Post / Article Text</label>
-              <textarea id="inputText" placeholder="Paste text, viral WhatsApp forward, tweet, or article content here in English, Tamil, or Hindi..." required></textarea>
-              <div class="input-meta">
-                <span id="charCount">0 characters</span>
-                <span>Supports Multilingual ONNX FastEmbed</span>
+              <div class="form-label">
+                <label for="inputText">Claim / Post / Article Text</label>
+                <span id="charCount" style="font-weight:400; font-size:12px;">0 characters</span>
               </div>
+              <textarea id="inputText" placeholder="Paste claim text, viral WhatsApp forward, tweet, or article content in English, Tamil, or Hindi..." required></textarea>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="inputUrl">Reference Domain / URL (Optional)</label>
-              <input type="text" id="inputUrl" placeholder="e.g. https://www.thehindu.com or https://suspicious-news.xyz/..." />
+              <div class="form-label">
+                <label for="inputUrl">Reference Domain / URL (Optional)</label>
+                <span style="font-weight:400; font-size:11.5px; color:#93c5fd;" id="domainHint">Evaluates source credibility</span>
+              </div>
+              <input type="text" id="inputUrl" placeholder="e.g. https://www.thehindu.com or https://suspicious-news.xyz/..." oninput="handleUrlInput(this.value)" />
             </div>
 
             <button type="submit" class="btn-primary" id="btnAnalyze">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Verify with TruthGuard</span>
+              <span>Run TruthGuard Verification</span>
             </button>
           </form>
         </div>
@@ -998,6 +1156,10 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               Triage & Explainability Report
             </h2>
+            <button class="btn-secondary" id="btnCopyReport" onclick="copyVerificationReport()" style="display:none; padding:4px 10px; font-size:11.5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Report
+            </button>
           </div>
 
           <!-- Empty state -->
@@ -1007,8 +1169,8 @@
               <line x1="12" y1="8" x2="12" y2="12"/>
               <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            <p style="font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Awaiting Input</p>
-            <p style="font-size: 13px;">Enter a claim or select a multilingual preset to inspect.</p>
+            <p style="font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Awaiting Input</p>
+            <p style="font-size: 13px;">Type a statement or choose a multilingual preset from the left to inspect.</p>
           </div>
 
           <!-- Result Content -->
@@ -1044,17 +1206,17 @@
               </div>
             </div>
 
-            <!-- Matched Fact Check Details (if matched) -->
+            <!-- Matched Fact Check Details -->
             <div id="matchedFactBox" class="matched-fact-box" style="display: none;">
               <div class="matched-fact-header">
-                <span>Verified Fact-Check Database Match</span>
-                <span id="matchedSimBadge" style="background: rgba(99, 102, 241, 0.2); padding: 2px 6px; border-radius: 4px;">Sim: 94.2%</span>
+                <span>Verified Fact-Check Evidence Match</span>
+                <span id="matchedSimBadge" style="background: rgba(99, 102, 241, 0.25); padding: 2px 7px; border-radius: 4px;">Sim: 94.2%</span>
               </div>
               <div class="matched-claim-text" id="matchedClaimText">"..."</div>
               <div class="matched-fact-meta">
                 <span>Publisher: <strong id="matchedPublisher" style="color:#fff;">BoomLive</strong></span>
                 <span>Verdict: <strong id="matchedVerdict" style="color:#fff;">False</strong></span>
-                <span id="matchedUrlContainer"><a id="matchedUrlLink" href="#" target="_blank" rel="noopener">Read Source ↗</a></span>
+                <span id="matchedUrlContainer"><a id="matchedUrlLink" href="#" target="_blank" rel="noopener">Read Source &rarr;</a></span>
               </div>
             </div>
 
@@ -1064,26 +1226,26 @@
               <ul class="reasons-list" id="reasonsList"></ul>
             </div>
 
-            <!-- Multi-Modal Submetrics -->
+            <!-- 4-Pillars Submetrics Grid -->
             <div class="submetrics-grid">
               <div class="submetric-box">
                 <div class="submetric-title">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                  Linguistic Risk
+                  Linguistic Tone
                 </div>
                 <div class="submetric-val" id="submetricLing">0 / 100</div>
               </div>
               <div class="submetric-box">
                 <div class="submetric-title">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-                  Domain Safety
+                  Domain Trust
                 </div>
-                <div class="submetric-val" id="submetricDomain">Neutral (50/100)</div>
+                <div class="submetric-val" id="submetricDomain">Neutral</div>
               </div>
               <div class="submetric-box">
                 <div class="submetric-title">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  ML Misinfo Prob
+                  ML Misinfo Risk
                 </div>
                 <div class="submetric-val" id="submetricML">0.0%</div>
               </div>
@@ -1096,13 +1258,14 @@
               </div>
             </div>
 
-            <!-- Feedback Row -->
-            <div class="feedback-section">
-              <span class="feedback-text">Agree with this triage classification?</span>
-              <div class="feedback-btns">
-                <button class="feedback-btn" onclick="sendFeedback('agree')">👍 Agree</button>
-                <button class="feedback-btn" onclick="sendFeedback('disagree')">👎 Dispute</button>
+            <!-- Report Action Bar & Feedback -->
+            <div class="report-action-bar">
+              <span style="font-size: 12px; color: var(--text-dim);" id="fbPromptText">Is this assessment accurate?</span>
+              <div class="action-btn-group" id="fbButtonGroup">
+                <button class="btn-secondary" onclick="sendFeedback('agree')">👍 Agree</button>
+                <button class="btn-secondary" onclick="sendFeedback('disagree')">🚩 Dispute</button>
               </div>
+              <span id="fbThanksText" style="display:none; color:var(--color-reliable); font-size:12px; font-weight:700;">✓ Feedback recorded!</span>
             </div>
           </div>
         </div>
@@ -1112,8 +1275,8 @@
     <!-- TAB 2: SIMULATED SOCIAL MEDIA FEED -->
     <div id="tabFeedView" style="display: none;">
       <div style="margin-bottom: 20px;">
-        <h2 style="font-family: 'Outfit'; font-size: 20px; font-weight: 700; margin-bottom: 4px;">Live Social Media & News Feed Simulation</h2>
-        <p style="font-size: 13px; color: var(--text-muted);">Simulated dynamic stream of incoming posts across English, Tamil, and Hindi. Click <strong>Verify with TruthGuard</strong> on any item to run instant explainable verification.</p>
+        <h2 style="font-family: 'Outfit'; font-size: 22px; font-weight: 700; margin-bottom: 4px;">Live Social Media & Viral Feed Stream</h2>
+        <p style="font-size: 13.5px; color: var(--text-muted);">Simulated dynamic social media stream across English, Tamil, and Hindi. Click <strong>Verify with TruthGuard</strong> on any post to inspect credibility in real-time.</p>
       </div>
 
       <div class="feed-container" id="feedContainer">
@@ -1193,11 +1356,11 @@
             </div>
           </div>
           <div class="feed-content">
-            ISRO successfully landed Chandrayaan-3 near the lunar south pole, confirming telemetry data from the Vikram lander and Pragyan rover.
+            ISRO successfully inserted India's solar observatory spacecraft Aditya-L1 into halo orbit around Lagrange point L1, confirming continuous observation of the Sun.
           </div>
           <div class="feed-action-bar">
             <span style="font-size:12px; color:var(--text-dim);">Source: reuters.com</span>
-            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-4', 'ISRO successfully landed Chandrayaan-3 near the lunar south pole', 'https://www.reuters.com/space/chandrayaan')">
+            <button class="btn-verify-feed" onclick="verifyFeedItem('feedItem-4', 'ISRO successfully inserted India solar observatory spacecraft Aditya-L1 into halo orbit around Lagrange point L1', 'https://www.reuters.com/science/isro-aditya-l1')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               Verify with TruthGuard
             </button>
@@ -1207,7 +1370,36 @@
       </div>
     </div>
 
-    <!-- TAB 3: AUDIT HISTORY -->
+    <!-- TAB 3: KNOWLEDGE BASE -->
+    <div id="tabKBView" style="display: none;">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-family: 'Outfit'; font-size: 22px; font-weight: 700; margin-bottom: 4px;">Fact-Check Knowledge Base</h2>
+        <p style="font-size: 13.5px; color: var(--text-muted);">Curated verified and debunked seed claims pre-embedded with FastEmbed ONNX across English, Tamil, and Hindi.</p>
+      </div>
+
+      <div class="kb-controls">
+        <div class="kb-search-box">
+          <input type="text" id="kbSearchInput" placeholder="Search claims by keyword (e.g., GPS, ISRO, தடுப்பூசி, 2000)..." oninput="renderKB()" />
+        </div>
+        <div class="kb-filter-row">
+          <button class="cat-btn active" id="kbLangAll" onclick="setKBLang('all')">All Languages</button>
+          <button class="cat-btn" id="kbLangEn" onclick="setKBLang('en')">🇬🇧 English</button>
+          <button class="cat-btn" id="kbLangTa" onclick="setKBLang('ta')">🇮🇳 தமிழ்</button>
+          <button class="cat-btn" id="kbLangHi" onclick="setKBLang('hi')">🇮🇳 हिन्दी</button>
+        </div>
+        <div class="kb-filter-row">
+          <button class="cat-btn active" id="kbVerdictAll" onclick="setKBVerdict('all')">All Verdicts</button>
+          <button class="cat-btn" id="kbVerdictFalse" onclick="setKBVerdict('false')">🔴 Debunked</button>
+          <button class="cat-btn" id="kbVerdictTrue" onclick="setKBVerdict('true')">🟢 Verified True</button>
+        </div>
+      </div>
+
+      <div class="kb-grid" id="kbGrid">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- TAB 4: AUDIT HISTORY -->
     <div id="tabHistoryView" style="display: none;">
       <div class="card">
         <div class="card-header">
@@ -1215,8 +1407,12 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             SQLite Audit History
           </h2>
-          <button class="feedback-btn" onclick="loadHistory()">Refresh Log</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-secondary" onclick="exportHistoryCSV()">Export CSV</button>
+            <button class="btn-secondary" onclick="loadHistory()">Refresh Log</button>
+          </div>
         </div>
+
         <div style="overflow-x: auto;">
           <table class="history-table">
             <thead>
@@ -1239,68 +1435,109 @@
       </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast">
+      <span id="toastIcon">✓</span>
+      <span id="toastMsg">Action completed</span>
+    </div>
+
     <!-- Footer -->
     <footer>
-      <p>TruthGuard Misinformation Assistant &bull; Lightweight CPU-First Stack (FastEmbed ONNX &bull; Scikit-Learn &bull; FastAPI &bull; SQLite)</p>
-      <p style="margin-top: 4px; font-size: 11px;">Multilingual Support: English &bull; தமிழ் (Tamil) &bull; हिन्दी (Hindi) &bull; Manifest V3 Chrome Extension Ready</p>
+      <p>TruthGuard Misinformation Assistant &bull; Explainable CPU-First Architecture (FastEmbed ONNX &bull; Scikit-Learn NLP &bull; FastAPI &bull; SQLite)</p>
+      <p style="margin-top: 4px; font-size: 11.5px;">Multilingual Support: English &bull; தமிழ் (Tamil) &bull; हिन्दी (Hindi) &bull; Manifest V3 Chrome Extension Ready</p>
     </footer>
   </div>
 
   <script>
     let currentAnalysisId = null;
+    let currentAnalysisData = null;
+    let seedClaimsData = [];
+    let currentKBLang = 'all';
+    let currentKBVerdict = 'all';
 
-    // Presets
-    const PRESETS = {
-      "en-fake": {
-        text: "SHOCKING! RBI is issuing new 1000 rupee notes with embedded GPS tracking microchip! Forward to all before deleted!",
-        url: "https://viral-news.xyz/rbi-1000-gps"
-      },
-      "en-true": {
-        text: "ISRO successfully landed Chandrayaan-3 near the lunar south pole, confirming telemetry data from the Vikram lander.",
-        url: "https://www.reuters.com/space/isro-chandrayaan-3-moon-landing"
-      },
-      "ta-fake": {
-        text: "அதிர்ச்சி செய்தி! புதிய 2000 ரூபாய் நோட்டில் செயற்கைக்கோள் ஜிபிஎஸ் மைக்ரோசிப் பொருத்தப்பட்டுள்ளது! உடனே பகிருங்கள்!",
-        url: ""
-      },
-      "ta-true": {
-        text: "சந்திரயான் 3 விண்கலத்தை நிலவின் தென் துருவத்தில் இஸ்ரோ வெற்றிகரமாக தரையிறக்கியது.",
-        url: "https://pib.gov.in/tamil-chandrayaan"
-      },
-      "hi-fake": {
-        text: "धमाका! 2000 के नोट में नैनो जीपीएस चिप लगी है जो जमीन के 120 मीटर नीचे से सिग्नल भेज सकती है! तुरंत शेयर करें!",
-        url: ""
-      },
-      "hi-true": {
-        text: "भारत ने चंद्रमा के दक्षिणी ध्रुव पर चंद्रयान 3 की सफल लैंडिंग कराई और इतिहास रचा।",
-        url: "https://pib.gov.in/hindi/chandrayaan-3"
-      },
-      "polarity": {
-        text: "It is completely false and a debunked rumor that RBI is issuing new 1000 rupee notes with GPS microchips.",
-        url: ""
-      },
-      "ling-extreme": {
-        text: "URGENT WARNING! YOU WON'T BELIEVE THIS MIRACLE CURE! DOCTORS ARE TERRIFIED! FORWARD TO EVERYONE IMMEDIATELY! 🚨🚨🚨",
-        url: "https://daily-miracle-cures.top"
-      }
-    };
+    // Preset Collections
+    const PRESETS = [
+      { id: 'en-fake', cat: 'en', label: '🇬🇧 RBI 1000 GPS', type: 'fake', text: 'SHOCKING! RBI is issuing new 1000 rupee notes with embedded GPS tracking microchip! Forward to all before deleted!', url: 'https://viral-news.xyz/rbi-1000-gps' },
+      { id: 'en-birds', cat: 'en', label: '🇬🇧 5G Bird Deaths', type: 'fake', text: '5G wireless cellular towers cause mass bird deaths and respiratory damage in human lungs.', url: 'https://conspiracy-daily.stream/5g-radiation' },
+      { id: 'en-onion', cat: 'en', label: '🇬🇧 Onion & Salt Cure', type: 'fake', text: 'Consuming raw onions with rock salt kills all viruses and cures infections within 15 minutes.', url: '' },
+      { id: 'en-true', cat: 'en', label: '🇬🇧 ISRO Chandrayaan-3', type: 'true', text: 'ISRO successfully landed Chandrayaan-3 near the lunar south pole, confirming telemetry data from the Vikram lander.', url: 'https://www.reuters.com/space/isro-chandrayaan-3-moon-landing' },
+      { id: 'en-aditya', cat: 'en', label: '🇬🇧 Aditya-L1 Mission', type: 'true', text: 'ISRO successfully inserted India\'s solar observatory spacecraft Aditya-L1 into halo orbit around Lagrange point L1.', url: 'https://www.thehindu.com/sci-tech/science/isro-aditya-l1' },
+      { id: 'ta-fake', cat: 'ta', label: '🇮🇳 புதிய 2000 நோட்டு ஜிபிஎஸ்', type: 'fake', text: 'அதிர்ச்சி செய்தி! புதிய 2000 ரூபாய் நோட்டில் செயற்கைக்கோள் ஜிபிஎஸ் மைக்ரோசிப் பொருத்தப்பட்டுள்ளது! உடனே பகிருங்கள்!', url: '' },
+      { id: 'ta-onion', cat: 'ta', label: '🇮🇳 வெங்காயம் வைரஸ்', type: 'fake', text: 'கல் உப்புடன் பச்சையான வெங்காயம் சாப்பிட்டால் மனித உடலில் உள்ள அனைத்து வைரஸ்களும் 15 நிமிடங்களில் அழியும்.', url: '' },
+      { id: 'ta-true', cat: 'ta', label: '🇮🇳 நிலவில் சந்திரயான் 3', type: 'true', text: 'சந்திரயான் 3 விண்கலத்தை நிலவின் தென் துருவத்தில் இஸ்ரோ வெற்றிகரமாக தரையிறக்கியது.', url: 'https://pib.gov.in/tamil-chandrayaan' },
+      { id: 'ta-aditya', cat: 'ta', label: '🇮🇳 ஆதித்யா எல்1 விண்கலம்', type: 'true', text: 'ஆதித்யா எல்1 விண்கலத்தை சூரியனின் லாக்ராஞ்சியன் புள்ளி எல்1 சுற்றுப்பாதையில் இஸ்ரோ வெற்றிகரமாக நிலைநிறுத்தியது.', url: 'https://www.dinamalar.com/news/isro-aditya-l1' },
+      { id: 'hi-fake', cat: 'hi', label: '🇮🇳 2000 नोट में नैनो चिप', type: 'fake', text: 'धमाका! 2000 के नोट में नैनो जीपीएस चिप लगी है जो जमीन के 120 मीटर नीचे से सिग्नल भेज सकती है! तुरंत शेयर करें!', url: '' },
+      { id: 'hi-onion', cat: 'hi', label: '🇮🇳 प्याज सेंधा नमक दावा', type: 'fake', text: 'कच्चा प्याज और सेंधा नमक एक साथ खाने से शरीर के सारे वायरस 15 मिनट में खत्म हो जाते हैं।', url: '' },
+      { id: 'hi-true', cat: 'hi', label: '🇮🇳 चंद्रयान 3 सफल लैंडिंग', type: 'true', text: 'भारत ने चंद्रमा के दक्षिणी ध्रुव पर चंद्रयान 3 की सफल लैंडिंग कराई और इतिहास रचा।', url: 'https://pib.gov.in/hindi/chandrayaan-3' },
+      { id: 'polarity', cat: 'special', label: '⚖️ Polarity Negation', type: 'warn', text: 'It is completely false and a debunked rumor that RBI is issuing new 1000 rupee notes with GPS microchips.', url: '' },
+      { id: 'ling-extreme', cat: 'special', label: '🚨 Clickbait Heuristic', type: 'warn', text: 'URGENT WARNING! YOU WON\'T BELIEVE THIS MIRACLE CURE! DOCTORS ARE TERRIFIED! FORWARD TO EVERYONE IMMEDIATELY! 🚨🚨🚨', url: 'https://daily-miracle-cures.top' },
+      { id: 'domain-cred', cat: 'special', label: '🛡️ Credible News Article', type: 'true', text: 'National Renewable Energy agency announced a pilot project for green hydrogen distribution infrastructure in coastal industrial corridors.', url: 'https://www.thehindu.com/news/national/energy-hydrogen' }
+    ];
 
-    function loadPreset(key) {
-      const preset = PRESETS[key];
-      if (preset) {
-        document.getElementById('inputText').value = preset.text;
-        document.getElementById('inputUrl').value = preset.url || '';
-        updateCharCount();
-      }
+    function renderPresetChips(catFilter = 'all') {
+      const wrap = document.getElementById('presetChipsWrap');
+      wrap.innerHTML = '';
+      const list = catFilter === 'all' ? PRESETS : PRESETS.filter(p => p.cat === catFilter);
+      list.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = `chip ${p.type === 'fake' ? 'chip-fake' : (p.type === 'true' ? 'chip-true' : '')}`;
+        chip.textContent = p.label;
+        chip.onclick = () => loadPreset(p);
+        wrap.appendChild(chip);
+      });
+    }
+
+    function filterPresets(cat) {
+      document.querySelectorAll('.preset-categories .cat-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderPresetChips(cat);
+    }
+
+    function loadPreset(p) {
+      document.getElementById('inputText').value = p.text;
+      document.getElementById('inputUrl').value = p.url || '';
+      updateCharCount();
+      handleUrlInput(p.url || '');
+      showToast(`Loaded preset: ${p.label}`);
     }
 
     function clearInputs() {
       document.getElementById('inputText').value = '';
       document.getElementById('inputUrl').value = '';
+      document.getElementById('domainHint').textContent = 'Evaluates source credibility';
+      document.getElementById('domainHint').style.color = '#93c5fd';
       updateCharCount();
     }
 
-    // Character counter
+    function handleUrlInput(val) {
+      const hint = document.getElementById('domainHint');
+      if (!val || !val.trim()) {
+        hint.textContent = 'Evaluates source credibility';
+        hint.style.color = '#93c5fd';
+        return;
+      }
+      try {
+        const parsed = new URL(val.startsWith('http') ? val : 'https://' + val);
+        const host = parsed.hostname.replace(/^www\./, '');
+        const credible = ['thehindu.com', 'bbc.com', 'reuters.com', 'who.int', 'pib.gov.in', 'isro.gov.in', 'nasa.gov'];
+        const unreliable = ['infowars.com', 'naturalnews.com', 'beforeitsnews.com'];
+        if (credible.some(d => host.includes(d))) {
+          hint.textContent = `✓ Recognized Credible Domain (${host})`;
+          hint.style.color = '#34d399';
+        } else if (unreliable.some(d => host.includes(d))) {
+          hint.textContent = `⚠ Flagged Unreliable Domain (${host})`;
+          hint.style.color = '#f87171';
+        } else {
+          hint.textContent = `Domain: ${host}`;
+          hint.style.color = '#cbd5e1';
+        }
+      } catch (e) {
+        hint.textContent = 'Invalid URL format';
+        hint.style.color = '#f87171';
+      }
+    }
+
+    // Character Counter
     const inputTextArea = document.getElementById('inputText');
     inputTextArea.addEventListener('input', updateCharCount);
     function updateCharCount() {
@@ -1312,15 +1549,16 @@
     function switchTab(tab) {
       document.getElementById('tabInspectorView').style.display = tab === 'inspector' ? 'block' : 'none';
       document.getElementById('tabFeedView').style.display = tab === 'feed' ? 'block' : 'none';
+      document.getElementById('tabKBView').style.display = tab === 'kb' ? 'block' : 'none';
       document.getElementById('tabHistoryView').style.display = tab === 'history' ? 'block' : 'none';
 
       document.getElementById('tabBtnInspector').classList.toggle('active', tab === 'inspector');
       document.getElementById('tabBtnFeed').classList.toggle('active', tab === 'feed');
+      document.getElementById('tabBtnKB').classList.toggle('active', tab === 'kb');
       document.getElementById('tabBtnHistory').classList.toggle('active', tab === 'history');
 
-      if (tab === 'history') {
-        loadHistory();
-      }
+      if (tab === 'history') loadHistory();
+      if (tab === 'kb') fetchSeedClaims();
     }
 
     // Form Submit Handler
@@ -1332,7 +1570,7 @@
 
       const btn = document.getElementById('btnAnalyze');
       btn.disabled = true;
-      btn.innerHTML = `<span class="status-pulse"></span> Verifying...`;
+      btn.innerHTML = `<span class="status-pulse"></span> <span>Synthesizing Signals...</span>`;
 
       try {
         const resp = await fetch('/api/analyze', {
@@ -1344,18 +1582,26 @@
         renderResult(data);
         fetchStats();
       } catch (err) {
-        alert('Error connecting to TruthGuard backend: ' + err.message);
+        showToast('Error connecting to backend: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span>Verify with TruthGuard</span>`;
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span>Run TruthGuard Verification</span>`;
       }
     }
 
     // Render Analysis Result
     function renderResult(data) {
       currentAnalysisId = data.id;
+      currentAnalysisData = data;
+
       document.getElementById('resultEmptyState').style.display = 'none';
       document.getElementById('resultContent').style.display = 'block';
+      document.getElementById('btnCopyReport').style.display = 'inline-flex';
+
+      // Reset feedback UI
+      document.getElementById('fbButtonGroup').style.display = 'flex';
+      document.getElementById('fbPromptText').style.display = 'inline';
+      document.getElementById('fbThanksText').style.display = 'none';
 
       const hero = document.getElementById('triageHero');
       hero.className = 'triage-display';
@@ -1381,7 +1627,7 @@
         document.getElementById('matchedPublisher').textContent = data.matched_claim.publisher || 'Fact-Checker';
         document.getElementById('matchedVerdict').textContent = (data.matched_claim.verdict || 'Reviewed').toUpperCase();
         const simVal = (data.breakdown.fact_check.similarity * 100).toFixed(1);
-        document.getElementById('matchedSimBadge').textContent = `Sim: ${simVal}%`;
+        document.getElementById('matchedSimBadge').textContent = `Similarity: ${simVal}%`;
         const link = document.getElementById('matchedUrlLink');
         if (data.matched_claim.url) {
           link.href = data.matched_claim.url;
@@ -1406,22 +1652,43 @@
         reasonsList.appendChild(li);
       });
 
-      // Multi-modal metrics
-      document.getElementById('submetricLing').textContent = `${data.breakdown.linguistic.risk_score} / 100`;
-      const domainTier = data.breakdown.domain.tier;
-      document.getElementById('submetricDomain').textContent = `${domainTier.toUpperCase()} (${data.breakdown.domain.risk_score}/100)`;
-      document.getElementById('submetricML').textContent = `${(data.breakdown.ml_classifier.fake_prob * 100).toFixed(1)}%`;
-      const matchText = data.breakdown.fact_check.matched 
-        ? `${(data.breakdown.fact_check.similarity * 100).toFixed(1)}% (${data.breakdown.fact_check.verdict})` 
-        : 'No Direct Match';
-      document.getElementById('submetricMatch').textContent = matchText;
+      // 4 Submetrics Pillars
+      const ling = data.breakdown.linguistic;
+      document.getElementById('submetricLing').textContent = `${ling.risk_score}/100 (${ling.flags.length ? ling.flags[0] : 'Neutral'})`;
+
+      const domain = data.breakdown.domain;
+      document.getElementById('submetricDomain').textContent = domain.domain ? `${domain.domain} (${domain.tier})` : 'No URL Provided';
+
+      const ml = data.breakdown.ml_classifier;
+      document.getElementById('submetricML').textContent = `${(ml.fake_prob * 100).toFixed(1)}% (${ml.is_fake ? 'Fake Pattern' : 'Reliable Syntax'})`;
+
+      const fc = data.breakdown.fact_check;
+      document.getElementById('submetricMatch').textContent = fc.matched 
+        ? `${(fc.similarity * 100).toFixed(1)}% (${fc.verdict})` 
+        : 'No Direct Evidence';
+    }
+
+    // Copy Verification Report
+    function copyVerificationReport() {
+      if (!currentAnalysisData) return;
+      const d = currentAnalysisData;
+      const report = `[TruthGuard Verification Report]
+Verdict: ${d.label}
+Risk Score: ${d.risk_score}/100 (Confidence: ${(d.confidence * 100).toFixed(0)}%)
+Analyzed Text: "${d.input_text || ''}"
+Key Decision Signals:
+${(d.reasons || []).map(r => `• ${r}`).join('\n')}
+Generated by TruthGuard Explainable Misinformation Engine`;
+      navigator.clipboard.writeText(report).then(() => {
+        showToast('Verification report copied to clipboard!');
+      });
     }
 
     // Inline feed verify
     async function verifyFeedItem(itemId, text, url) {
       const resContainer = document.getElementById(`${itemId}-result`);
       resContainer.style.display = 'block';
-      resContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">Verifying claim with multilingual ONNX matcher...</div>`;
+      resContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);"><span class="status-pulse"></span> Verifying claim across multilingual knowledge base...</div>`;
 
       try {
         const resp = await fetch('/api/analyze', {
@@ -1443,16 +1710,108 @@
         resContainer.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span class="badge-pill ${badgeClass}">${data.label}</span>
-            <span style="font-size:12px; font-weight:700;">Risk Score: ${data.risk_score}/100</span>
+            <span style="font-size:12px; font-weight:800;">Risk Score: ${data.risk_score}/100</span>
           </div>
-          <div style="font-size:12px; color:var(--text-main); line-height:1.4;">
+          <div style="font-size:12.5px; color:var(--text-main); line-height:1.45;">
             ${(data.reasons || [])[0] || 'Triage completed based on multi-factor analysis.'}
+          </div>
+          <div style="margin-top:8px; font-size:11px; color:var(--text-dim); display:flex; justify-content:space-between;">
+            <span>ML Prob: ${(data.breakdown.ml_classifier.fake_prob * 100).toFixed(0)}%</span>
+            <span>Fact-Check: ${data.breakdown.fact_check.matched ? (data.breakdown.fact_check.similarity * 100).toFixed(0) + '% match' : 'Unmatched'}</span>
           </div>
         `;
         fetchStats();
       } catch (err) {
         resContainer.innerHTML = `<span style="color:#f87171; font-size:12px;">Failed to verify: ${err.message}</span>`;
       }
+    }
+
+    // Knowledge Base Fetch & Render
+    async function fetchSeedClaims() {
+      if (seedClaimsData.length > 0) return;
+      try {
+        const resp = await fetch('/api/seed-claims');
+        const data = await resp.json();
+        seedClaimsData = data.claims || [];
+        document.getElementById('kbCountBadge').textContent = seedClaimsData.length;
+        renderKB();
+      } catch (e) {
+        console.warn('Failed to load seed claims:', e);
+      }
+    }
+
+    function setKBLang(lang) {
+      currentKBLang = lang;
+      ['All', 'En', 'Ta', 'Hi'].forEach(l => {
+        const el = document.getElementById('kbLang' + l);
+        if (el) el.classList.toggle('active', l.toLowerCase() === lang.toLowerCase());
+      });
+      renderKB();
+    }
+
+    function setKBVerdict(verdict) {
+      currentKBVerdict = verdict;
+      ['All', 'False', 'True'].forEach(v => {
+        const el = document.getElementById('kbVerdict' + v);
+        if (el) el.classList.toggle('active', v.toLowerCase() === verdict.toLowerCase());
+      });
+      renderKB();
+    }
+
+    function renderKB() {
+      const grid = document.getElementById('kbGrid');
+      const q = (document.getElementById('kbSearchInput').value || '').toLowerCase().trim();
+
+      let filtered = seedClaimsData.filter(c => {
+        if (currentKBLang !== 'all' && c.language !== currentKBLang) return false;
+        if (currentKBVerdict !== 'all' && c.verdict !== currentKBVerdict) return false;
+        if (q) {
+          const matchClaim = (c.claim || '').toLowerCase().includes(q);
+          const matchPub = (c.publisher || '').toLowerCase().includes(q);
+          const matchExpl = (c.explanation || '').toLowerCase().includes(q);
+          if (!matchClaim && !matchPub && !matchExpl) return false;
+        }
+        return true;
+      });
+
+      grid.innerHTML = '';
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-dim);">No claims match your search filters.</div>`;
+        return;
+      }
+
+      filtered.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'kb-card';
+        const isFalse = c.verdict === 'false';
+        const pillClass = isFalse ? 'pill-fake' : (c.verdict === 'true' ? 'pill-reliable' : 'pill-warning');
+        const verdictText = isFalse ? 'Debunked Fake' : (c.verdict === 'true' ? 'Verified True' : 'Mixed / Context');
+
+        card.innerHTML = `
+          <div>
+            <div class="kb-card-header">
+              <span class="badge-pill ${pillClass}">${verdictText}</span>
+              <span style="font-size:10px; text-transform:uppercase; font-weight:700; color:var(--text-dim);">${c.language}</span>
+            </div>
+            <div class="kb-claim">"${escapeHtml(c.claim)}"</div>
+            <div class="kb-expl">${escapeHtml(c.explanation || '')}</div>
+          </div>
+          <div>
+            <div class="kb-meta">
+              <span>Audited by <strong>${escapeHtml(c.publisher || 'Fact-Checker')}</strong></span>
+              <button class="btn-secondary" style="padding:3px 8px; font-size:10.5px;" onclick="testKBClaim(${JSON.stringify(c.claim).replace(/"/g, '&quot;')})">Test in Inspector &rarr;</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function testKBClaim(claimText) {
+      document.getElementById('inputText').value = claimText;
+      updateCharCount();
+      switchTab('inspector');
+      document.getElementById('btnAnalyze').click();
     }
 
     // Feedback
@@ -1464,9 +1823,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ analysis_id: currentAnalysisId, verdict })
         });
-        alert('Thank you! Your feedback has been recorded in the TruthGuard audit log.');
+        document.getElementById('fbButtonGroup').style.display = 'none';
+        document.getElementById('fbPromptText').style.display = 'none';
+        document.getElementById('fbThanksText').style.display = 'inline';
+        showToast('Feedback recorded in TruthGuard audit database!');
+        fetchStats();
       } catch (err) {
-        console.error(err);
+        showToast('Error recording feedback: ' + err.message);
       }
     }
 
@@ -1476,8 +1839,8 @@
         const resp = await fetch('/api/stats');
         const data = await resp.json();
         document.getElementById('statTotalCount').textContent = data.total_analyses || 0;
-        document.getElementById('statFakesCount').textContent = data.labels['Potential Fake/Misinformation'] || 0;
-        document.getElementById('statReliableCount').textContent = data.labels['Likely Reliable'] || 0;
+        document.getElementById('statFakesCount').textContent = (data.labels && data.labels['Potential Fake/Misinformation']) || 0;
+        document.getElementById('statReliableCount').textContent = (data.labels && data.labels['Likely Reliable']) || 0;
       } catch (err) {
         console.log('Stats error:', err);
       }
@@ -1487,7 +1850,7 @@
     async function loadHistory() {
       const tbody = document.getElementById('historyTableBody');
       try {
-        const resp = await fetch('/api/history?limit=25');
+        const resp = await fetch('/api/history?limit=30');
         const data = await resp.json();
         tbody.innerHTML = '';
         if (!data.history || data.history.length === 0) {
@@ -1516,13 +1879,54 @@
       }
     }
 
+    // Export CSV
+    async function exportHistoryCSV() {
+      try {
+        const resp = await fetch('/api/history?limit=100');
+        const data = await resp.json();
+        if (!data.history || data.history.length === 0) {
+          showToast('No records to export');
+          return;
+        }
+        let csv = 'ID,Label,Risk,Confidence,Text,URL,Created\n';
+        data.history.forEach(r => {
+          const cleanText = (r.text || '').replace(/"/g, '""');
+          csv += `"${r.id}","${r.label}",${r.risk},${r.confidence},"${cleanText}","${r.url || ''}","${r.created}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `truthguard-audit-${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Exported audit history to CSV!');
+      } catch (e) {
+        showToast('CSV export failed');
+      }
+    }
+
+    // Toast
+    let toastTimeout = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.style.display = 'flex';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        t.style.display = 'none';
+      }, 3000);
+    }
+
     function escapeHtml(text) {
+      if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
 
-    // Init
+    // Initial Execution
+    renderPresetChips('all');
     fetchStats();
   </script>
 </body>
